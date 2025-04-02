@@ -1,4 +1,4 @@
 # Local Netlify folder
 .netlify
-.node_modules
-# Local build folder
+# local node_modules
+node_modules/
