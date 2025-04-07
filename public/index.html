@@ -1,33 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat en temps réel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RealTimeX IA - Chat en temps réel</title>
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    // Connexion au serveur WebSocket
-    var socket = io();
-
-    // Envoi d'un message
-    function sendMessage() {
-      var message = document.getElementById("messageInput").value;
-      socket.emit('message', message); // Envoi du message au serveur
-    }
-
-    // Réception des messages
-    socket.on('message', function(msg) {
-      var messages = document.getElementById("messages");
-      var messageElement = document.createElement("li");
-      messageElement.textContent = msg;
-      messages.appendChild(messageElement);
-    });
-  </script>
+  <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
-  <h1>Chat en temps réel</h1>
-  <ul id="messages"></ul>
-  <input id="messageInput" type="text">
-  <button onclick="sendMessage()">Envoyer</button>
+  <header>💬 RealTime X</header>
+  <div id="messages"></div>
+  <div id="inputContainer">
+    <input id="messageInput" type="text" placeholder="Tapez votre message..." />
+    <button id="micButton">🎙️ Parler</button>
+    <button onclick="sendMessage()">Envoyer</button>
+  </div>
+
+  <script>
+    const socket = io();
+
+    // Fonction pour envoyer le message
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const message = input.value.trim();
+      if (!message) return;
+      socket.emit('message', message);
+      input.value = '';
+    }
+
+    // Fonction pour ajouter un message à l'interface
+    function addMessage(text, type) {
+      const messages = document.getElementById("messages");
+      const msgEl = document.createElement("div");
+      msgEl.className = `message ${type}`;
+      msgEl.textContent = text;
+      messages.appendChild(msgEl);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Fonction de reconnaissance vocale
+    function startSpeechRecognition() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("La reconnaissance vocale n'est pas supportée par votre navigateur.");
+        return;
+      }
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "fr-FR";  // Langue française
+      recognition.continuous = false;  // Ne pas écouter en continu
+      recognition.interimResults = false;  // Ne pas donner de résultats partiels
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        console.log('Reconnaissance vocale: ', transcript);
+        sendMessage(transcript); // Envoi du message reconnu
+      };
+
+      recognition.onerror = function(event) {
+        console.error('Erreur de reconnaissance vocale: ', event.error);
+      };
+    }
+
+    // Ajouter un événement au bouton microphone pour activer la reconnaissance vocale
+    document.getElementById("micButton").addEventListener("click", startSpeechRecognition);
+
+    // Écoute des messages du serveur
+    socket.on('message', function(msg) {
+      if (msg.startsWith('Assistant 🤖')) {
+        addMessage(msg, 'bot');
+      } else {
+        addMessage(msg, 'user');
+      }
+    });
+
+    // Permet d'envoyer le message avec la touche Entrée
+    document.getElementById("messageInput").addEventListener("keypress", function(e) {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
 </body>
 </html>

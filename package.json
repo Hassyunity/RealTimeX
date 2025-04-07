@@ -8,10 +8,12 @@
   "dependencies": {
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "http-errors": "~1.6.3",
     "jstransformer": "^1.0.0",
     "morgan": "~1.9.1",
+    "openai": "^4.91.1",
     "pug": "^3.0.3",
     "socket.io": "^4.8.1"
   }
